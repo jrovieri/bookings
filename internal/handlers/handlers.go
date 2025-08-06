@@ -6,7 +6,10 @@ import (
 	"net/http"
 
 	"github.com/jrovieri/bookings/internal/config"
+	"github.com/jrovieri/bookings/internal/db"
 	"github.com/jrovieri/bookings/internal/forms"
+	"github.com/jrovieri/bookings/internal/handlers/repository"
+	"github.com/jrovieri/bookings/internal/handlers/repository/dbrepo"
 	"github.com/jrovieri/bookings/internal/helpers"
 	"github.com/jrovieri/bookings/internal/models"
 	"github.com/jrovieri/bookings/internal/render"
@@ -16,11 +19,13 @@ var Repo *Repository
 
 type Repository struct {
 	App *config.AppConfig
+	DB  repository.DatabaseRepo
 }
 
-func NewRepo(a *config.AppConfig) *Repository {
+func NewRepo(a *config.AppConfig, db *db.DB) *Repository {
 	return &Repository{
 		App: a,
+		DB:  dbrepo.NewPostgresRepo(db.SQL, a),
 	}
 }
 

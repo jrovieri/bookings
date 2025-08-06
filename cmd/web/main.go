@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/jrovieri/bookings/internal/config"
+	"github.com/jrovieri/bookings/internal/db"
 	"github.com/jrovieri/bookings/internal/handlers"
 	"github.com/jrovieri/bookings/internal/models"
 	"github.com/jrovieri/bookings/internal/render"
@@ -25,7 +26,12 @@ var errorLog *log.Logger
 
 func main() {
 
-	err := run()
+	myDB, err := run()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer myDB.SQL.Close()
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -40,7 +46,7 @@ func main() {
 	log.Fatal(err)
 }
 
-func run() error {
+func run() (*db.DB, error) {
 	gob.Register(models.Reservation{})
 
 	app.InProduction = false
@@ -58,6 +64,14 @@ func run() error {
 	session.Cookie.Secure = app.InProduction
 	app.Session = session
 
+	log.Println("Connectiong to database...")
+	myDB, err := db.ConnectDB("host=localhost port=5432 dbname=bookings user=bookings password=gfq&?snAkpQx65p3")
+	if err != nil {
+		log.Fatal("cannot connect to database! stopping...")
+		return nil, err
+	}
+	log.Println("connected to database!")
+
 	tc, err := render.CreateTemplateCache()
 
 	if err != nil {
@@ -66,9 +80,9 @@ func run() error {
 	app.TemplateCache = tc
 	app.UseCache = true
 
-	repo := handlers.NewRepo(&app)
+	repo := handlers.NewRepo(&app, myDB)
 	handlers.NewHandlers(repo)
 
 	render.NewTemplate(&app)
-	return nil
+	return myDB, nil
 }
