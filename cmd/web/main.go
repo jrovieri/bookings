@@ -47,7 +47,11 @@ func main() {
 }
 
 func run() (*db.DB, error) {
+
 	gob.Register(models.Reservation{})
+	gob.Register(models.User{})
+	gob.Register(models.Room{})
+	gob.Register(models.Restriction{})
 
 	app.InProduction = false
 
@@ -75,7 +79,8 @@ func run() (*db.DB, error) {
 	tc, err := render.CreateTemplateCache()
 
 	if err != nil {
-		log.Fatal("cannot create template cache")
+		app.ErrorLog.Println(err)
+		app.ErrorLog.Fatal("cannot create template cache")
 	}
 	app.TemplateCache = tc
 	app.UseCache = true
@@ -83,6 +88,6 @@ func run() (*db.DB, error) {
 	repo := handlers.NewRepo(&app, myDB)
 	handlers.NewHandlers(repo)
 
-	render.NewTemplate(&app)
+	render.NewRenderer(&app)
 	return myDB, nil
 }
