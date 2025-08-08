@@ -2,6 +2,7 @@ package dbrepo
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/jrovieri/bookings/internal/models"
@@ -62,15 +63,15 @@ func (m *postgresDBRepo) SearchAvailabilityByDatesAndRoomId(start, end time.Time
 
 	var numRows int
 
-	query := `select count(*) from room_restrictions 
+	query := `select count(id) from room_restrictions 
                 where room_id = $1 and start_date > $2 and end_date < $3`
 
-	rows := m.DB.QueryRowContext(ctx, query, start, end)
+	rows := m.DB.QueryRowContext(ctx, query, roomID, start, end)
 	err := rows.Scan(&numRows)
 	if err != nil {
 		return false, err
 	}
-
+	fmt.Println(numRows)
 	if numRows == 0 {
 		return true, nil
 	}
@@ -83,7 +84,7 @@ func (m *postgresDBRepo) SearchAvailabilityForAllRooms(start, end time.Time) ([]
 
 	var rooms []models.Room
 	stmt := `select r.id, r.room_name from rooms r 
-            where r.id not in (select room_id from room_restrictions rr where rr.start_date >= $1 and rr.end_date <= $2)`
+            where r.id not in (select room_id from room_restrictions rr where rr.start_date > $1 and rr.end_date < $2)`
 
 	rows, err := m.DB.QueryContext(ctx, stmt, start, end)
 	if err != nil {
