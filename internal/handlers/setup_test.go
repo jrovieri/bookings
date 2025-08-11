@@ -47,6 +47,8 @@ func TestMain(m *testing.M) {
 	app.MailChan = mailChan
 	defer close(mailChan)
 
+	listenForMail()
+
 	tc, err := CreateTestTemplateCache()
 
 	if err != nil {
@@ -141,8 +143,7 @@ func listenForMail() {
 
 	go func() {
 		for {
-			_ = <-app.MailChan
-
+			<-app.MailChan
 		}
 	}()
 }
