@@ -32,6 +32,19 @@ func main() {
 	}
 	defer myDB.SQL.Close()
 
+	defer close(app.MailChan)
+	fmt.Println("Starting mail listener")
+
+	listenForMail()
+
+	// msg := models.MailData{
+	// 	To:      "john.doe@example.com",
+	// 	From:    "jrovieri@example.com",
+	// 	Subject: "the subject",
+	// 	Content: "",
+	// }
+	// app.MailChan <- msg
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,6 +65,9 @@ func run() (*db.DB, error) {
 	gob.Register(models.User{})
 	gob.Register(models.Room{})
 	gob.Register(models.Restriction{})
+
+	mailChan := make(chan models.MailData)
+	app.MailChan = mailChan
 
 	app.InProduction = false
 
