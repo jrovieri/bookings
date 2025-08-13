@@ -33,3 +33,5 @@ go.work.sum
 
 database.yml
 target/
+
+.DS_Store
