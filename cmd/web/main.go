@@ -11,6 +11,7 @@ import (
 	"github.com/jrovieri/bookings/internal/config"
 	"github.com/jrovieri/bookings/internal/db"
 	"github.com/jrovieri/bookings/internal/handlers"
+	"github.com/jrovieri/bookings/internal/helpers"
 	"github.com/jrovieri/bookings/internal/models"
 	"github.com/jrovieri/bookings/internal/render"
 
@@ -105,5 +106,6 @@ func run() (*db.DB, error) {
 	handlers.NewHandlers(repo)
 
 	render.NewRenderer(&app)
+	helpers.NewHelpers(&app)
 	return myDB, nil
 }

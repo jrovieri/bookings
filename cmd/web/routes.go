@@ -32,6 +32,12 @@ func routes(app *config.AppConfig) http.Handler {
 	mux.Post("/make-reservation", handlers.Repo.PostReservation)
 	mux.Get("/reservation-summary", handlers.Repo.ReservationSummary)
 
+	mux.Get("/user/login", handlers.Repo.ShowLogin)
+	mux.Post("/user/login", handlers.Repo.PostLogin)
+	mux.Get("/user/logout", handlers.Repo.Logout)
+
+	mux.With(Auth).Get("/admin/dashboard", handlers.Repo.AdminDashboard)
+
 	fileServer := http.FileServer(http.Dir("./static"))
 	mux.Handle("/static/*", http.StripPrefix("/static", fileServer))
 	return mux
