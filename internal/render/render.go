@@ -8,18 +8,26 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"time"
 
 	"github.com/jrovieri/bookings/internal/config"
 	"github.com/jrovieri/bookings/internal/models"
 	"github.com/justinas/nosurf"
 )
 
-var functions = template.FuncMap{}
+var functions = template.FuncMap{
+	"humanDate": HumanDate,
+}
+
 var pathToTemplates = "./templates"
 var app *config.AppConfig
 
 func NewRenderer(a *config.AppConfig) {
 	app = a
+}
+
+func HumanDate(t time.Time) string {
+	return t.Format("2006-01-02")
 }
 
 func AddDefaultData(r *http.Request, td *models.TemplateData) *models.TemplateData {
