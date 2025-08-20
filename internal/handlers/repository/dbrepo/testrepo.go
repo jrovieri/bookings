@@ -75,6 +75,7 @@ func (m *testDBRepo) SearchAvailabilityForAllRooms(start, end time.Time) ([]mode
 	testDateToFail, err := time.Parse(layout, "2060-01-01")
 	if err != nil {
 		log.Println(err)
+		return rooms, err
 	}
 
 	if time.Time.Equal(start, testDateToFail) {
@@ -114,6 +115,9 @@ func (m *testDBRepo) UpdateUser(u models.User) error {
 }
 
 func (m *testDBRepo) Authenticate(email, testPassword string) (int, string, error) {
+	if email == "jack@nimble.com" {
+		return 0, "", errors.New("some error")
+	}
 	return 0, "", nil
 }
 
