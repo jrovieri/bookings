@@ -16,7 +16,10 @@ import (
 )
 
 var functions = template.FuncMap{
-	"humanDate": HumanDate,
+	"humanDate":  HumanDate,
+	"formatDate": FormatDate,
+	"iterate":    Iterate,
+	"add":        Add,
 }
 
 var pathToTemplates = "./templates"
@@ -107,4 +110,22 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 		theCache[name] = ts
 	}
 	return theCache, nil
+}
+
+func FormatDate(t time.Time, fmt string) string {
+	return t.Format(fmt)
+}
+
+func Iterate(count int) []int {
+	var i int
+	var items []int
+
+	for i = 0; i < count; i++ {
+		items = append(items, i)
+	}
+	return items
+}
+
+func Add(a, b int) int {
+	return a + b
 }
