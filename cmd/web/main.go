@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/gob"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -68,10 +69,26 @@ func run() (*db.DB, error) {
 	gob.Register(models.Restriction{})
 	gob.Register(map[string]int{})
 
+	inProduction := flag.Bool("production", false, "Application is in production")
+	useCache := flag.Bool("cache", true, "Use cache template")
+	dbHost := flag.String("dbhost", "localhost", "Database host")
+	dbPort := flag.String("dbport", "5432", "Database port")
+	dbName := flag.String("dbname", "", "Database name")
+	dbUser := flag.String("dbuser", "", "Database user")
+	dbPass := flag.String("dbpass", "", "Database password")
+	dbSSL := flag.String("dbssl", "disable", "Database ssl settings (disable, prefer, require)")
+
+	flag.Parse()
+
+	if *dbName == "" || *dbUser == "" || *dbPass == "" {
+		fmt.Println("Missing required flags")
+		os.Exit(1)
+	}
+
 	mailChan := make(chan models.MailData)
 	app.MailChan = mailChan
 
-	app.InProduction = false
+	app.InProduction = *inProduction
 
 	infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	app.InfoLog = infoLog
@@ -86,8 +103,11 @@ func run() (*db.DB, error) {
 	session.Cookie.Secure = app.InProduction
 	app.Session = session
 
-	log.Println("Connectiong to database...")
-	myDB, err := db.ConnectDB("host=localhost port=5432 dbname=bookings user=bookings password=gfq&?snAkpQx65p3")
+	connStr := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
+		*dbHost, *dbPort, *dbName, *dbUser, *dbPass, *dbSSL)
+
+	log.Println("Connecting to database...")
+	myDB, err := db.ConnectDB(connStr)
 	if err != nil {
 		log.Fatal("cannot connect to database! stopping...")
 		return nil, err
@@ -101,7 +121,7 @@ func run() (*db.DB, error) {
 		app.ErrorLog.Fatal("cannot create template cache")
 	}
 	app.TemplateCache = tc
-	app.UseCache = true
+	app.UseCache = *useCache
 
 	repo := handlers.NewRepo(&app, myDB)
 	handlers.NewHandlers(repo)
